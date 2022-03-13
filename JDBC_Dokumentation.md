@@ -307,4 +307,535 @@ Im weiteren Verlaufe ist die Vorgehensweise dieselbe wie bei der Suche nach alle
 Mit der while loop wird solange über das ResultSet iteriert solange rs.next() true ist. Sobald rs.next false ist, ist sozusagen kein Datensatz mehr verfügbar.  
 
 
-Aufgabe 2 JDBC Intro Teil 2
+# Aufgabe 2 & 3 JDBC Intro Teil 2
+
+Die Aufgabe 2 widmet sich dem 2ten Teil des JDBC Intros bestehend aus 13 Videos die anzuschauen und zu bearbeiten sind, um sich in weiterer Folge mit dem DAO Pattern auseinanderzusetzen und einen Überblick über die Funktionsweise / Zusammensetzung zu bekommen. In folgendem Abschnitt werden dementsprechend entsprechende und wichtige Schritte / Konzepte festgehalten.
+
+## Projektsetup
+
+Folgende 4 Schritte sind beim Projektsetup von essenzieller Bedeutung:
+- Webserver (XAMPP)
+- Datenbankserver (XAMPP)
+- IDE
+- Maven-Projektsetup 
+
+Als erstes startet wir beim XAMPP Control Panel den Webserver als auch den Datenbankserver. Im weiteren Verlauf wird zur Datenbankadministration phpmyadmin angewendet.
+
+Als nächstes wird eine neue Datenbank namens „kurssystem“ angelegt.
+
+<p align = "center">
+  <img src="https://user-images.githubusercontent.com/91562113/158076410-840dcc7c-e01a-49e4-adac-da214938dbd8.png"/>
+</p>
+
+Hinzu kommt auch die Erstellung einer Tabelle namens „courses“.
+
+![image](https://user-images.githubusercontent.com/91562113/158076479-ed552367-2361-4138-a67f-8d067acc1108.png)
+
+Nach Eingabe des gewünschten Namens der Tabelle und Angabe der benötigten Spalten kann mit OK die Erstellung bestätigt werden.
+
+Als nächstes müssen die Spalten mit gewünschten Eigenschaften befüllt werden. In folgender Abbildung sind die Eigenschaften der Tabelle zu sehen:
+
+![image](https://user-images.githubusercontent.com/91562113/158076493-fbe107c8-148d-45ee-a959-3e363e9748a1.png)
+ 
+Hier ist auch noch eine SQL-Vorschau zu sehen:
+
+ ![image](https://user-images.githubusercontent.com/91562113/158076497-ff9794d8-e51e-4f75-b0e8-309b4c9eeaa1.png)
+
+Jetzt kann man sich über den Reiter Einfügen ein oder mehrere Datensätze einfügen. Hierbei wurde ein Datensatz mit folgenden Daten erstellt:
+
+![image](https://user-images.githubusercontent.com/91562113/158076508-21594eff-8788-4915-9619-ef9a5063f1d8.png)
+
+Nach dem Bestätigen mit OK wurde der Datensatz eingefügt und es war folgende Meldung zu sehen:
+
+ ![image](https://user-images.githubusercontent.com/91562113/158076514-7a05398f-8982-41e5-818b-bef30b736765.png)
+
+Im 2ten Teil des Projektsetups wird in IntelliJ ein neues Maven-Projekt angelegt. Folgendes Schritte sind zu erledigen:
+1)	Unter dem Reiter File -> New -> Project kommt man zum Konfigurationsfenster hin.
+
+ ![image](https://user-images.githubusercontent.com/91562113/158076521-2a390f90-4644-41a6-a796-4c4a499b269e.png)
+
+2)	Als nächstes die Option Maven wählen, die ausgewählte SDK ist die Version 17.0.1 -> Weiter mit Next
+
+ ![image](https://user-images.githubusercontent.com/91562113/158076523-accb6ddb-7ec4-4c4e-b0ae-f763ff3ecdb9.png)
+
+3)	Beim nächstes Fenster ->Projektname eintragen, evtl. Pfad anpassen, bei den Artifact Coordinates die GroupId anpassen -> Auf Finish klicken
+ 
+![image](https://user-images.githubusercontent.com/91562113/158076530-a0667f90-434b-4cb4-a52b-68442ece067b.png)
+
+Hiermit wurde das Maven-Projekt erstellt. Im weiteren Verlaufe geht man auf die Website mvnrepository.com um sich die benötigten Dependencies herauszusuchen um die Syntax der Dependencies in die pom.xml hineinzukopieren. In weiterer Abfolge werden die Dependencies beim Laden von Maven heruntergeladen.
+ 
+![image](https://user-images.githubusercontent.com/91562113/158076539-aa3d3671-cde6-4dff-b3d3-94573cea031a.png)
+
+![image](https://user-images.githubusercontent.com/91562113/158076545-25743722-b267-497b-87eb-e52eb5b3dc93.png)
+ 
+Als nächstes wurde eine Main Klasse, eine dazugehörige main Methode und einer Konsolenausgabe zum Testen der Main Klasse angelegt.
+
+ ![image](https://user-images.githubusercontent.com/91562113/158076551-6838c058-f0e1-4b5a-90c6-b9c390debc9a.png)
+
+Anschließend wurde noch die main Methode ausgeführt, um diese auch auf Funktion zu prüfen.
+
+![image](https://user-images.githubusercontent.com/91562113/158076559-f8eac2f7-3ed4-4f03-a822-ff82690a78ad.png)
+ 
+Wie in obiger Abbildung zu sehen ist war der Test natürlich erfolgreich.
+
+## Aufbau der Datenbankverbindung Teil 1
+
+Hierbei kommt das Singleton Pattern zum Einsatz. Es bietet sich bei der Datenbankverbindung sehr gut an da diese nur einmal aufgebaut werden muss sofern eine vorhanden.
+
+Als nächstes wird ein neues Package namens „dataaccess“ erstellt.
+
+![image](https://user-images.githubusercontent.com/91562113/158076585-6a4590b5-001e-4010-884f-5486cc6db77c.png)
+
+Weiters wurde in diesem Package eine neue Klasse namens „MysqlDatabaseConnection“ erstellt.
+
+![image](https://user-images.githubusercontent.com/91562113/158076589-23348c4a-156e-44f0-86df-5fa4598e41d2.png)
+
+Diese Klasse wurde im weiteren Verlauf implementiert. Als erstes wurde eine private statische variable namens con vom Typ Connection deklariert und dieser wurde null zugewiesen. Des Weiteren wurde ein privater Konstruktor angelegt und es wurde auch die hauptsächliche Methode zum Verbindungsaufbau implementiert. Hierbei handelt es sich um eine öffentliche statische Methode namens getConnection vom Typ Connection. Diese Methode benötigt folgende Parameter: url, user, pwd. Die Methode gibt uns ein Connection Objekt zurück. 
+
+In folgender Abbildung ist der Quellcodeabschnitt zu sehen:
+
+'''
+public class MysqlDatabaseConnection {
+    //Statisches Feld vom Typ Connection
+    private static Connection con = null;
+
+    private MysqlDatabaseConnection()
+    {
+
+    }
+
+    public static Connection getConnection(String url, String user, String pwd) throws ClassNotFoundException, SQLException {
+        if(con != null) {
+            return con;
+        } else {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(url, user, pwd);
+            return con;
+        }
+    }
+}
+'''
+
+In der main Methode der Main-Klasse wurde ein try-catch Konstrukt aufgezogen, um das Singleton-Pattern zu testen. Anbei ist der folgende Quellcode zu sehen:
+
+'''
+public class Main {
+
+    public static void main(String[] args) {
+
+        try {
+            Connection myConnection =
+                    MysqlDatabaseConnection.getConnection("jdbc:mysql://localhost:3307/kurssystem","root","");
+            System.out.println("Verbindung erfolgreich aufgebaut!");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("Verbindung fehlgeschlagen!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Verbindung fehlgeschlagen!");
+        }
+    }
+}
+'''
+
+## Erstellung Kommandozeilenmenü
+
+Dazu legt man sich ein neues Package namens „ui“ an. Des Weiteren legt man eine neue Klasse namens „Cli“ an.
+
+In der Cli Klasse wurde als erstes eine Variable namens scan vom Typ Scanner definiert. Weiters wurde im Konstruktor ein neues Scanner Objekt erstellt und der scan Variable zugewiesen. Des Weiteren wurde ein Switch Case angewendet mit dem wird durch verschiedene Auswahlmöglichkeiten iterieren.
+
+'''
+public class Cli {
+
+    Scanner scan;
+    
+    public Cli() {
+        this.scan = new Scanner(System.in);
+    }
+
+    public void start() {
+        String input = "-";
+        while (!input.equals("x")) {
+            showMenue();
+            input = scan.nextLine();
+            switch (input) {
+                case "1":
+                    addCourse();
+                    break;
+                case "2":
+                    showAllCourses();
+                    break;
+
+                case "x":
+                    System.out.println("Auf Wiedersehen!");
+                    break;
+                default:
+                    inputError();
+                    break;
+            }
+        }
+        scan.close();
+    }
+
+private void showMenue() {
+        System.out.println("-------------KURSMANAGEMENT-------------");
+        System.out.println("(1) Kurs eingeben \t (2) Alle Kurse anzeigen \t (x) ENDE");
+    }
+
+    private void inputError() {
+        System.out.println("Bitte nur die Zahlen der Menüauswahl eingeben!");
+    }
+}
+'''
+
+## Domain Package
+
+Als nächstes erstellen wir uns ein „domain“ Verzeichnis und die darin benötigten Entitäten als Klassen. Es wurden eine Course Klasse und eine Course Type Klasse angelegt. Die Course Type Klasse ist ein Enum das die verschiedenen Kurstypen enthält. Des Weiteren wurde die  abstrakte BaseEntity Klasse erstellt. Diese ist für die automatische Eintragung der ID zuständig -> Sie kümmert sich um die Logik der IDs. In der Course Klasse müssen Konstruktoren, div. Getter & Setter implementiert werden. Einer davon mit ID & der andere ohne ID bzw. die ID wird auf Null gesetzt.
+
+![image](https://user-images.githubusercontent.com/91562113/158078297-e3f9e31f-b10a-46bb-815e-df8ced92f019.png)
+
+## DAO GetAll Implementierung Teil 2 
+
+
+Als erstes fügen wir über die Datenbankadministrationskonsole einen weiteren Datensatz ein. In folgender Abbildung sind die Eigenschaften des Datensatzes zu sehen:
+
+![image](https://user-images.githubusercontent.com/91562113/158078326-be55031e-89cd-499f-930d-37fb60f9b8b5.png)
+
+Wie in der Tabelle courses zu sehen ist sind jetzt 2 Datensätze vorhanden:
+
+![image](https://user-images.githubusercontent.com/91562113/158078335-be6a72b1-6d27-42f5-8fc2-8ca63835b1de.png)
+
+Im Anschluss wurde das Programm ausgeführt und die Implementierung des Cases 2 namens showAllCourses() getestet:
+
+![image](https://user-images.githubusercontent.com/91562113/158078343-1a342f17-e993-443d-9c15-824d87a2ec3a.png)
+
+## GetById Implementierung
+
+Hierbei geht es um die Implementierung der getById Methode der Klasse MySqlCourseRepository. Diese dient uns, um nach bestimmten Kursen suchen zu können.
+
+
+Als erstes wird ein neues Package namens „util“ angelegt und in diesem wird auch eine neue Klasse namens „Assert“ erstellt.
+
+![image](https://user-images.githubusercontent.com/91562113/158078362-c6bad579-3505-4e30-b7df-d378b9334551.png)
+
+Diese Klasse hat nur die Aufgabe uns die Nullchecks (Nullabfragen) zu übernehmen.
+Hier ist folgender Quellcode der Assert Klasse einsehbar:
+
+'''
+public class Assert {
+    public static void notNull(Object o)
+    {
+        if(o == null) throw new IllegalArgumentException("Reference must not be null");
+    }
+}
+'''
+
+Der Vorteil ist, dass die statische Methode überall verwendet kann und es viel schneller ist als überall den Nullcheck händisch übernehmen muss.
+
+Des Weiteren wurde in der MySqlCourseRepository eine Hilfsmethode namens „countCoursesInDbWithId“ vom Typ int. Hierzu ist folgender Quellcode ersichtlich:
+
+'''
+private int countCoursesInDbWithId(Long id)
+{
+    try {
+        String countSql = "SELECT COUNT(*) FROM `courses` WHERE `id`=?";
+        PreparedStatement preparedStatementCount = con.prepareStatement(countSql);
+        preparedStatementCount.setLong(1, id);
+        ResultSet resultSetCount = preparedStatementCount.executeQuery();
+        resultSetCount.next();
+        int courseCount = resultSetCount.getInt(1);
+        return courseCount;
+    } catch (SQLException sqlException)
+    {
+        throw new DatabaseException(sqlException.getMessage());
+    }
+}
+'''
+
+Weiters wurde auch die Methode getById vollständig ausimplementiert, wo die Hilfsmethode zur Anwendung bei beim Nullcheck kam. In folgender Abbildung ist der Quellcode ersichtlich:
+
+'''
+@Override
+public Optional<Course> getById(Long id) {
+    Assert.notNull(id);
+    if(countCoursesInDbWithId(id) == 0)
+    {
+        return Optional.empty();
+    } else {
+        try {
+            String sql = "SELECT * FROM `courses` WHERE `id` = ?";
+            PreparedStatement preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            resultSet.next();
+            Course course = new Course(
+                    resultSet.getLong("id"),
+                    resultSet.getString("name"),
+                    resultSet.getString("description"),
+                    resultSet.getInt("hours"),
+                    resultSet.getDate("beginDate"),
+                    resultSet.getDate("endDate"),
+                    CourseType.valueOf(resultSet.getString("coursetype"))
+            );
+            return Optional.of(course);
+
+        } catch (SQLException sqlException)
+        {
+            throw new DatabaseException(sqlException.getMessage());
+        }
+    }
+}
+'''
+
+Weiters wurde in der Cli Klasse im Cli-Menü ein weiterer Case hinzugefügt der bei Auswahl per Konsoleneingabe der Zahl 3 durch den jew. Anwender die Methode namens „showCourseDetails“ aufruft. Folgende Implementierung ist zu sehen:
+
+![image](https://user-images.githubusercontent.com/91562113/158078544-2a05d9e8-9fd3-4420-8fac-ba34e93a8c1f.png)
+
+Als nächstes wurde in der Cli Klasse eine interne private Methode namens „showCourseDetails“ implementiert die beim Case „3“ hinterlegt wurde. Am Anfang wird der Anwender nach der Eingabe der zu suchenden Kursid gefragt. Im try-catch Konstrukt wird von repo Objekt aus die getById aufgerufen und dieser wird der eingelese Parameter namens courseId mitübergeben und das Ergebnis wird in ein Optional vom Typ Course namens courseOptional gespeichert. Weiters wird mit einem If-else Konstrukt geprüft, ob ein courseOptional bzw. ein Kurs vorliegt wenn ja dann wird dieser auf der Konsole ausgegeben ansonsten wird eine custom Konsolenausgabe ausgegeben.
+Im catch Block werden die Exceptions bzw. Fehler abgefangen und ein wenig abgeändert durch eigens angepasste Fehlermeldungen mit Verkettung der Standardnachricht. Die Ausgabe im Fehlerfall erfolgt per Konsolenausgabe.
+
+Anbei der Quellcode der showCourseDetails() Methode:
+
+'''
+private void showCourseDetails() {
+    System.out.println("Für welchen Kurs möchten Sie die Kursdetails anzeigen?");
+    Long courseId = Long.parseLong(scan.nextLine());
+    try
+    {
+        Optional<Course> courseOptional = repo.getById(courseId);
+        if(courseOptional.isPresent())
+        {
+            System.out.println(courseOptional.get());
+        } else
+        {
+            System.out.println("Kurs mit der ID " + courseId + " nicht gefunden!");
+        }
+    } catch(DatabaseException databaseException)
+    {
+        System.out.println("Datenbankfehler bei Kurs-Detailanzeige: " + databaseException.getMessage());
+    } catch (Exception exception)
+    {
+        System.out.println("Unbekannter Fehler bei Kurs-Detailanzeige: " + exception.getMessage());
+    }
+}
+'''
+  
+Weiters wurde auch ein kleine Anpassung der showMenue() Methode vorgenommen wo lediglich die Konsolenausgabe angepasst werden musste. Hierzu ist folgende Abbildung ersichtlich:
+
+![image](https://user-images.githubusercontent.com/91562113/158078621-76f03214-99ef-4fee-a2f1-8bbe99206423.png)
+
+## CRUD Implementierung
+
+Hierbei geht es um die Bereitstellung der Funktionalität zur Erstellung eines Kurses durch unser Cli-Menü. Die grundlegende Vorgangsweise ist folgende das zuerst die Daten vom Anwender abgefragt werden, der entsprechende Kurs erzeugt wird und der jeweilige Datensatz in die Datenbank geschrieben wird.
+
+### Insert()
+
+Erweiterung in der Cli-Klasse durch weitere Methode namens „addCourse“. Hierzu ist folgender Quellcode zu sehen:
+
+'''
+private void addCourse() {
+    String name, description;
+    int hours;
+    Date dateFrom, dateTo;
+    CourseType courseType;
+
+    try
+    {
+        System.out.println("Bitte alle Kursdaten angeben: ");
+        System.out.println("Name: ");
+        name = scan.nextLine();
+        if(name.equals("")) throw new IllegalArgumentException("Eingabe darf nicht leer sein!");
+        System.out.println("Beschreibung: ");
+        description = scan.nextLine();
+        if(description.equals("")) throw new IllegalArgumentException("Eingabe darf nicht leer sein!");
+        System.out.println("Stundenanzahl: ");
+        hours = Integer.parseInt(scan.nextLine());
+        System.out.println("Startdatum (YYYY-MM-DD): ");
+        dateFrom = Date.valueOf(scan.nextLine());
+        System.out.println("Enddatum (YYYY-MM-DD): ");
+        dateTo = Date.valueOf(scan.nextLine());
+        System.out.println("Kurstyp (ZA/BF/FF/OE): ");
+        courseType = CourseType.valueOf(scan.nextLine());
+
+        Optional<Course> optionalCourse = repo.insert(
+                new Course(name,description,hours,dateFrom,dateTo,courseType)
+        );
+
+        if(optionalCourse.isPresent())
+        {
+            System.out.println("Kurs angelegt: " + optionalCourse.get());
+        } else
+        {
+            System.out.println("Kurs konnte nicht angelegt werden!");
+        }
+
+    } catch(IllegalArgumentException illegalArgumentException)
+    {
+        System.out.println("Eingabefehler: " + illegalArgumentException.getMessage());
+    } catch (InvalidValueException invalidValueException)
+    {
+        System.out.println("Kursdaten nicht korrekt angegeben: " + invalidValueException.getMessage());
+    } catch (DatabaseException databaseException)
+    {
+        System.out.println("Datenbankfehler beim Einfügen: " + databaseException.getMessage());
+    } catch (Exception exception)
+    {
+        System.out.println("Unbekannter Fehler beim Einfügen: " + exception.getMessage());
+    }
+}
+'''
+
+Als erstes wurden lokale Variablen mit den jeweiligen Typen deklariert. Im try-Block wurde der Anwender durch Meldungen auf der Konsole nach den benötigten Daten abgefragt. Diese wurde mittels Scanner der jeweiligen Variablen zugewiesen. An manchen Stellen wurde intern validiert mittels if (jew. Variable.equals(““)) … und dann Auswurf der jew. Exception mit einer eigenen Meldung. Bei den letzteren Abfragen hat man sich auf die Validierung innerhalb der Domäne verlassen. Nach Einlesen der Daten wurde ein Optional vom Typ Course definiert. Von der repo Variable wurde die Methode insert aufgerufen in der ein neuer Kurs erstellt wurde mit Übergabe der jew. lokalen Variablen. Das Ergebnis des insert Aufrufs wurde dem Optional Objekt zugewiesen. 
+
+Des Weiteren wurde mittels if-Abfrage geprüft, ob im Optional überhaupt etwas verfügbar ist. Anhand dessen wurde bei Verfügbarkeit die Meldung ausgegeben das der Kurs angelegt wurde und ansonsten eine eigene Fehlermeldung, dass der Kurs nicht angelegt werden konnte.
+Es wurden hierbei auch alle möglichen Exceptions mittels jew. catch Blöcke abgefangen.
+
+## CRUD - Update Implementierung
+
+Hierbei geht es um die Bereitstellung von der Funktionalität der Aktualisierung von jew. Entitäten.
+Es wurde hierbei die update Methode mit dem Rückgabetyp Optional<Course> implementiert. Darunter ist folgender Quellcodeabschnitt ersichtlich:
+
+'''
+private void updateCourseDetails() {
+    System.out.println("Für welche Kurs-ID möchten Sie die Kursdetails ändern?");
+    Long courseId = Long.parseLong(scan.nextLine());
+
+    try
+    {
+        Optional<Course> courseOptional = repo.getById(courseId);
+        if(courseOptional.isEmpty())
+        {
+            System.out.println("Kurs mit der gegebenen ID nicht in der Datenbank!");
+        } else
+        {
+            Course course = courseOptional.get();
+
+            System.out.println("Änderungen für folgenden Kurs: ");
+            System.out.println(course);
+
+            String name, description, hours, dateFrom, dateTo, courseType;
+
+            System.out.println("Bitte neue Kursdaten angeben (Enter, falls keine Änderung gewünscht ist):");
+            System.out.println("Name: ");
+            name = scan.nextLine();
+            System.out.println("Beschreibung: ");
+            description = scan.nextLine();
+            System.out.println("Stundenanzahl: ");
+            hours = scan.nextLine();
+            System.out.println("Startdatum (YYYY-MM-DD): ");
+            dateFrom = scan.nextLine();
+            System.out.println("Enddatum (YYYY-MM-DD): ");
+            dateTo = scan.nextLine();
+            System.out.println("Kurstyp (ZA/BF/FF/OE): ");
+            courseType = scan.nextLine();
+
+            Optional<Course> optionalCourseUpdated = repo.update(
+                    new Course(course.getId(),
+                                name.equals("") ? course.getName() : name,
+                                description.equals("") ? course.getDescription() : description,
+                                hours.equals("") ? course.getHours() : Integer.parseInt(hours),
+                                dateFrom.equals("") ? course.getBeginDate() : Date.valueOf(dateFrom),
+                                dateTo.equals("") ? course.getEndDate() : Date.valueOf(dateTo),
+                                courseType.equals("") ? course.getCourseType() : CourseType.valueOf(courseType)
+                    )
+            );
+
+            //Funktionale Programmierung
+            optionalCourseUpdated.ifPresentOrElse(
+                    (c)-> System.out.println("Kurs aktualisiert: " + c),
+                    ()-> System.out.println("Kurs konnte nicht aktualisiert werden!")
+            );
+        }
+    } catch (Exception exception)
+    {
+        System.out.println("Unbekannter Fehler bei Kursupdate: " + exception.getMessage());
+    }
+}
+'''
+
+Hierbei wurde die update Methode ausimplementiert. Hier übergeben wir einen Kurs und aktualisieren die gewünschten Felder basierend auf der ID des übermittelten Kurses.
+  
+## CRUD – Delete Implementierung
+
+Hierbei geht es um die Bereitstellung von der Funktionalität des Löschens von jew. Entitäten.
+Es wurde hierbei die deleteCourse Methode mit dem Rückgabetyp void implementiert. Darunter ist folgender Quellcodeabschnitt ersichtlich:
+
+'''
+private void deleteCourse() {
+    System.out.println("Welchen Kurs möchten Sie löschen? Bitte ID eingeben: ");
+    Long courseIdToDelete = Long.parseLong(scan.nextLine());
+
+    try
+    {
+        repo.deleteById(courseIdToDelete);
+    }
+    catch (DatabaseException databaseException)
+    {
+        System.out.println("Datenbankfehler beim Löschen: " + databaseException.getMessage());
+    }
+    catch (Exception e)
+    {
+        System.out.println("Unbekannter Fehler beim Löschen: " + e.getMessage());
+    }
+}
+'''
+
+Hier wird einfach der Benutzer nach der ID des zu löschenden Datensatzes abgefragt. Eingabe wurde per scanner eingelesen und wurde einer entsprechenden Variable zugewiesen. Im Try Block wird vom Repository Objekt aus die deleteById Methode aufgerufen. Dieser wurde natürlich die ID mittels Parameterübergabe der courseToDelete Variable übergeben. In den jeweiligen 2 catch Blöcken werden spezifische Fehlermeldungen mittels SysOut realisiert.
+  
+## DAO Implementierung Kurssuche
+
+Hierbei ist es darum gegangen die Methoden zur Suche nach bestimmten Kursen mittels Name oder Beschreibung. Dazu wurde im SQL Statement die LOWER Anweisung angewendet und diese setzt die Werte lediglich auf Kleinschreibung um. Die Werte werden dann in Fragezeichen sog. Platzhalter hinzugefügt. Die Prozentzeichen dienen uns als Wildcards, um nach den benutzerdefinierten String zu suchen. Im Anschluss werden alle zutreffenden Zeilen in eine ArrayList hinzugefügt. Diese Ergebnisse werden einfach zurückgegeben.
+
+![image](https://user-images.githubusercontent.com/91562113/158079002-1e9f43ab-46f2-4bfa-82a4-974b554a4dbe.png)
+
+## DAO Implementierung Running Courses
+
+![image](https://user-images.githubusercontent.com/91562113/158079024-d96417df-b193-4d9f-ad4e-9e31cd1910f5.png)
+
+Als nächstes wurde die oben zu sehende Methode implementiert. Diese ähnelt sich mit vorgehender Methode stark. Das wichtigste was sich meistens ändert ist das SQL Statement.
+  
+# Aufgabe 4 JDBC und DAO - Studenten
+Erweitere die fertig nachprogrammierte Applikation mit einem DAO für CRUD für eine neue Domänenklasse „Student“:
+- Studenten haben einen eine Student-ID, einen VN, einen NN, ein Geburtsdatum
+- Domänenklasse implementieren (Setter absichern, neue Exceptions definieren, Business-Regeln selbst wählen - z.B. dass Name nicht leer sein darf)
+- Eigenes Interface MyStudentRepository von BaseRepository ableiten. MyStudentRepository muss mindestens 3 studentenspezifische Methoden enthalten (z.B. Studentensuche nach Namen, Suche nach ID, Suche nach bestimmtem Geburtsjahr, Suche mit Geburtsdatum zwischen x und y etc.).
+- Implementierung von MyStudentRepository durch eine neue Klasse MySqlStudentRepository analog zum MySqlCourseRepository.
+- Erweiterung des CLI für die Verarbeitung von Studenten und für spezifische Studenten-Funktionen (z.B. Student nach dem Namen suchen)
+
+Der Quell Code zur Aufgabe ist im Stammverzeichnis enthalten.
+
+# Aufgabe 5 JDBC und DAO - Buchungen
+Gib einen textuellen Vorschlag hab, wie man die bisher programmierte Applikation für die Buchung von Kursen
+durch Studenten erweitern könnte.
+Beschreibe, wie eine neue Buchungs-Domänenklasse ausschauen sollte, wie man ein DAO für Buchungen dazu
+entwickeln sollte, wie man die CLI anpassen müsste und welche Anwendungsfälle der Benutzer brauchen
+könnte (wie etwa „Buchung erstellen“).
+Verwende zur Illustration insb. auch UML-Diagramme.
+
+Man könnte eine n zu m Verbindung zwischen der Student Entität und der Kurs Entität erstellen. Die daraus etablierte Zwischentabelle wird derzeit Buchung genannt. So kann ein Student über etliche Buchungen verfügen und ein Kurs kann zu vielerlei Buchungen gehören. In der Buchung könnte daraufhin z.B.: das Buchungsdatum und der Buchungszeitraum stehen, uvm.
+
+Im „dataaccess“ Verzeichnis würde man jetzt eine MySqlBookingRepository Klasse & ein MyBookingRepository Interface erstellen und fertig implementieren. Im „domain“ Verzeichnis würde man eine Accounting Entität benötigen. In der Cli könnte man mühelos die Szenarien hinzufügen wie z.B.:
+
+Basis Repository
+- Alle Buchungen ausgeben
+- Einzelne Buchungen auffinden und herausgeben
+- Buchung aktualisieren
+- Buchung löschen
+- Buchung erstellen
+
+MyBookingRepository
+- Buchungen im Datum-Intervall von x bis y finden
+- Abgelaufene Buchungen finden
+- Laufende Buchungen finden  	
+
+<p align = "center">
+  <img src="https://user-images.githubusercontent.com/91562113/158075819-4524326e-c915-418f-80e0-be22537a416e.png"/>
+</p>
+
+In nachfolgender Abbildung wäre eine mögliche Version der Implementierung als ER-Modell zu sehen:
+Ein dazugehöriges UML Diagramm könnte wie folgt aussehen:
+
+<p align = "center">
+  <img src="https://user-images.githubusercontent.com/91562113/158075866-2873717d-fb2c-4712-b2c9-f3fad8bb50b1.png"/>
+</p>
